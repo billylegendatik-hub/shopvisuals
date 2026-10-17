@@ -1,0 +1,59 @@
+name: build-loader-exe
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Build mod
+        run: gradle build -p mod
+
+      - name: Build loader jar (mod bundled inside)
+        shell: pwsh
+        run: |
+          $mod = Get-ChildItem mod/build/libs/*.jar | Where-Object { $_.Name -notmatch 'sources|dev' } | Select-Object -First 1
+          Write-Host "Bundling $($mod.Name)"
+          New-Item -ItemType Directory -Force loader/out | Out-Null
+          javac --release 17 -d loader/out loader/Loader.java
+          Copy-Item $mod.FullName loader/out/shopvisuals.jar
+          New-Item -ItemType Directory -Force loader/pkg | Out-Null
+          jar --create --file loader/pkg/ShopVisualsLoader.jar --main-class Loader -C loader/out .
+
+      - name: Package exe (portable folder with Java bundled)
+        shell: pwsh
+        run: |
+          jpackage --type app-image --name ShopVisualsLoader --app-version 1.0 `
+            --input loader/pkg --main-jar ShopVisualsLoader.jar --main-class Loader `
+            --add-modules java.base,java.desktop,java.net.http,java.logging `
+            --dest dist-portable
+          Compress-Archive -Path dist-portable/ShopVisualsLoader -DestinationPath ShopVisualsLoader-portable.zip
+
+      - name: Package exe (single-file installer)
+        shell: pwsh
+        run: |
+          jpackage --type exe --name ShopVisualsLoader --app-version 1.0 `
+            --input loader/pkg --main-jar ShopVisualsLoader.jar --main-class Loader `
+            --add-modules java.base,java.desktop,java.net.http,java.logging `
+            --win-shortcut --win-menu --win-per-user-install `
+            --dest dist-installer
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShopVisualsLoader-exe
+          path: |
+            dist-installer/*.exe
+            ShopVisualsLoader-portable.zip
