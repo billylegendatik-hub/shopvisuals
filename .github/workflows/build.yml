@@ -38,7 +38,7 @@ jobs:
         run: |
           jpackage --type app-image --name ShopVisualsLoader --app-version 1.0 `
             --input loader/pkg --main-jar ShopVisualsLoader.jar --main-class Loader `
-            --add-modules java.base,java.desktop,java.net.http,java.logging `
+            --add-modules java.base,java.desktop,java.net.http,java.logging `,jdk.crypto.ec,jdk.crypto.cryptoki,java.naming
             --dest dist-portable
           Compress-Archive -Path dist-portable/ShopVisualsLoader -DestinationPath ShopVisualsLoader-portable.zip
 
@@ -47,7 +47,7 @@ jobs:
         run: |
           jpackage --type exe --name ShopVisualsLoader --app-version 1.0 `
             --input loader/pkg --main-jar ShopVisualsLoader.jar --main-class Loader `
-            --add-modules java.base,java.desktop,java.net.http,java.logging `
+            --add-modules java.base,java.desktop,java.net.http,java.logging `,jdk.crypto.ec,jdk.crypto.cryptoki,java.naming
             --win-shortcut --win-menu --win-per-user-install `
             --dest dist-installer
 
