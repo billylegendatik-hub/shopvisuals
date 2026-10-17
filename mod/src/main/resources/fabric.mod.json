@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "shopvisuals",
+  "version": "${version}",
+  "name": "ShopVisuals",
+  "description": "Watermark, module list and keystrokes HUD.",
+  "environment": "client",
+  "entrypoints": { "client": ["dev.shopvisuals.ShopVisuals"] },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
